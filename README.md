@@ -16,6 +16,9 @@ SeQuoIA is a snakemake pipeline performing single cell BCR repertoire processing
 Additionally, a model of SHM is performed and allows the inference of selection pressure at the codon or sequence level. 
 The associated paper describes the methodology, the benchmark of phylogeny reconstruction and selection quantification, as well as new biological results obtained with the application of the pipeline. 
 
+
+![pipeline overview](Pipeline_Overview.png)
+
 **Correspondance:** hector@ciml.univ-mrs.fr (until june 2025), milpied@ciml.univ-mrs.fr
 
 **Citation:** 
