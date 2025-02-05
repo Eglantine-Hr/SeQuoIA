@@ -1,4 +1,4 @@
-# SeQuoIA
+# SeQuoIA pipeline for BCRseq
 
 
 ---
