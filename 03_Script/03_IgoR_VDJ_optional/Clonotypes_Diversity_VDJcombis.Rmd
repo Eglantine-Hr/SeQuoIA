@@ -1,0 +1,104 @@
+---
+title: "Aggregating Sequence Scores Results"
+author: "hector@ciml.univ-mrs.fr"
+output:
+  html_document:
+    code_folding: hide
+    theme: cerulean
+    toc: true
+    toc_float: true
+    mathjax: null 
+    self_contained: true  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,progress = FALSE, verbose = FALSE)
+```
+
+
+
+# Loading libraries and data 
+
+
+```{r loadings}
+
+###libraries
+source( file.path( WORKING_DIR, "00_generalDeps.R"));
+#source( file.path( WORKING_DIR, "allFunctions.R"));
+
+
+### Data 
+Pgen_Clono_Df = read.table(VDJ_IGOR_TABLE, header = F, sep = ",") %>% dplyr::mutate(across(where(is.character), str_trim))
+colnames(Pgen_Clono_Df) <- c("Clonotype", "Chain", "Pgen")
+
+
+
+VDJ_Proba_Sizes = read.table(VDJ_COMBIS_TABLE, header = T, sep = ',' )
+VDJ_Proba_Sizes = left_join(distinct(VDJ_Proba_Sizes), Pgen_Clono_Df  )
+
+
+Select_Score_Df = read.table(SELECT_SCORE_TABLE, header = T, sep = " ")
+Select_Score_Df  = Select_Score_Df %>% dplyr::filter(Sample == current_sample ) 
+Combined_Df = inner_join(Select_Score_Df, VDJ_Proba_Sizes)
+
+```
+
+
+
+# VDJ usage
+
+```{r}
+ggplot(VDJ_Proba_Sizes, aes(d_call, v_call, fill = Pgen,  size = as.numeric(Clone_Size)), color = "lightgray") +
+  geom_point(shape = 21, stroke = 0, alpha = 0.5) +
+  scale_x_discrete(position = "top") +
+  scale_radius(range = c(1, 15)) +
+  scale_fill_gradient(low = "orange", high = "blue") + #, breaks = c(0, .5, 1), labels = c("Great", "OK", "Bad"), limits = c(0, 1)
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 0, vjust = 1))
+```
+
+# PreGC vs GCR selection 
+
+
+## Global overview 
+
+```{r fig.height=6, fig.width=11}
+
+plot1 = ggplot(Combined_Df, aes(x = Pgen, y = Global_Select_Score ) ) + geom_point(aes(color = Clonotype , fill = Clonotype ), shape = 21  , size = 1, alpha = 0.2 ) +
+  theme_classic() + ggtitle("Immediate Select Score vs Pgen") +
+  facet_wrap(~Chain , nrow = 2 , scales = 'free_x') +
+  theme(legend.position = "none", strip.background = element_rect(fill="seashell3"), panel.border = element_rect(colour = "black", fill=NA, size=0.5) )
+
+plot2 = ggplot(Combined_Df, aes(x = Pgen, y = Cumulated_Select_Score ) ) + geom_point(aes(color = Clonotype , fill = Clonotype ), shape = 21  , size = 1, alpha = 0.2 ) +
+  theme_classic() + ggtitle("Immediate Select Score vs Pgen") +
+  facet_wrap(~Chain , nrow = 2 , scales = 'free_x') +
+  theme(legend.position = "none", strip.background = element_rect(fill="seashell3"), panel.border = element_rect(colour = "black", fill=NA, size=0.5) )
+
+cowplot::plot_grid( plot1, plot2, nrow = 1  )
+
+
+```
+
+## Mean score selection vs Pgen 
+
+```{r fig.height=6, fig.width=11}
+Combined_Df_Summarized = Combined_Df %>%  
+                  group_by(Clonotype, Chain) %>% dplyr::summarise(meanScoreImmediate = mean(Global_Select_Score, na.rm = T), 
+                                                                  meanScoreCumulated =    mean(Cumulated_Select_Score, na.rm = T), 
+                                                                  Pgen = mean(Pgen , na.rm = T)) %>% 
+                  dplyr::mutate( logSize = log2(Clone_Size)/2   ) 
+
+
+
+plot1 = ggplot(Combined_Df_Summarized, aes(x = Pgen, y = meanScoreCumulated ) ) + geom_point(aes(size = logSize, color = Clonotype ), shape = 19, alpha = 0.2 ) +
+  theme_classic() + facet_wrap(~Chain , nrow = 2 , scales = 'free_x') +
+  theme(legend.position = "none", strip.background = element_rect(fill="seashell3"), panel.border = element_rect(colour = "black", fill=NA, size=0.5) )
+
+plot2 = ggplot(Combined_Df_Summarized, aes(x = Pgen, y = meanScoreImmediate ) ) + geom_point(aes(size = logSize, color = Clonotype ), shape = 19, alpha = 0.2 ) +
+  theme_classic() + facet_wrap(~Chain , nrow = 2 , scales = 'free_x') +
+  theme(legend.position = "none", strip.background = element_rect(fill="seashell3"), panel.border = element_rect(colour = "black", fill=NA, size=0.5) )
+
+cowplot::plot_grid( plot1, plot2, nrow = 1  )
+                  
+```
+
+

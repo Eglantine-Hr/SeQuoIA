@@ -1,0 +1,130 @@
+---
+title: "Aggregating Sequence Scores Results"
+author: "hector@ciml.univ-mrs.fr"
+output:
+  html_document:
+    code_folding: hide
+    theme: cerulean
+    toc: true
+    toc_float: true
+    mathjax: null 
+    self_contained: true  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,progress = FALSE, verbose = FALSE)
+```
+
+
+
+# Loading libraries and data 
+
+
+```{r loadings}
+
+#libraries
+source( file.path( WORKING_DIR, "00_generalDeps.R"));
+#source( file.path( WORKING_DIR, "allFunctions.R"));
+
+
+# Data 
+All_Scores_Df  = read.table(ALL_SCORES_TABLE, header = T, row.names = NULL)
+
+All_Scores_Df_Repeated_Seqs = All_Scores_Df
+All_Scores_Df = distinct(All_Scores_Df %>% dplyr::select(-SeqID))  
+
+All_Scores_Df = All_Scores_Df %>% dplyr::mutate(Clone_Size =   as.numeric(gsub(".*CLONOTYPE_n(.+)_Id.*", "\\1", Clonotype))    ) %>% dplyr::filter(Dist_ToGermline < 75 )
+						 #Global_Select_Score = as.numeric(Global_Select_Score), Cumulated_Select_Score = as.numeric(Cumulated_Select_Score)  )
+
+
+All_Clones_Df = read.table(ALL_CLONES_TABLE, header = T) #, sep = "\t"
+if("Sample" %in% names(All_Clones_Df) ==F){All_Clones_Df$Sample = "All"}
+
+
+```
+
+
+
+```{r}
+read_chunk( path=file.path( WORKING_DIR, "01_CloneSize_Correlation.R"));
+read_chunk( path=file.path( WORKING_DIR, "02_SelectScores_groups.R"));
+read_chunk( path=file.path( WORKING_DIR, "03_Clonal_Diversity.R"));
+read_chunk( path=file.path( WORKING_DIR, "04_AA_properties.R"));
+read_chunk( path=file.path( WORKING_DIR, "05_Updating_Metadata.R"));
+
+```
+
+
+# Clonal Diversity
+
+```{r Clonal_Diversity, fig.width=7}
+<<Clonal_Diversity>>
+
+```
+
+Chao1 is a non-parametric estimator widely used in studies of species richness in natural ecosystems. The rationale
+is that if many species (or clones) are detected only once, there is likely a large number of
+clones that have not yet been detected; when all clones have been detected at least twice,
+it is unlikely that new undetected clones exist.
+reference: https://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf 
+
+
+
+```{r Chao1_Inference, fig.height=3}
+<<Chao1_Inference>>
+
+```
+
+
+# Clone size vs Select Score 
+```{r}
+#All_Scores_Df = All_Scores_Df %>% dplyr::filter( as.numeric(Global_Select_Score) < 0.9 ) #TO DELETE AFTER? TEMPORARY SOLUTION 
+#Selecting sequences that are closely related to real sequence (no gaps + no inferrence)
+#All_Scores_Df = All_Scores_Df %>% dplyr::filter( as.numeric(MutSinceParent) <4  ) #& grepl("[Ss]eq", ParentNode )
+```
+
+
+
+```{r CloneSize_Correlation , fig.height=3.5, fig.width=5.5}
+<<CloneSize_Correlation>>
+
+```
+<br />
+
+# Select Score per group 
+
+
+
+
+# Cells Groups comparison {.tabset .tabset-fade}
+
+```{r SelectScores_groups, fig.height=5, fig.width=11, results = "asis"}
+<<SelectScores_groups>>
+```
+
+
+
+
+
+
+<!-- Ending the tabset section -->
+### {.toc-ignore} 
+<br /><br />
+
+
+
+# Mutation Patterns {.tabset .tabset-fade}
+
+```{r AA_properties, results = "asis"}
+<<AA_properties>>
+```
+
+
+
+# Updating Metadata
+
+#```{r updateMetadata}
+#<<updateMetadata>>
+#```
+
+

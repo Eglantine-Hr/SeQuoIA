@@ -1,0 +1,125 @@
+---
+title: "Tree selection within parsimony forest"
+author: "hector@ciml.univ-mrs.fr"
+output:
+  html_document:
+    code_folding: hide
+    theme: cerulean
+    toc: true
+    toc_float: true
+    mathjax: null 
+    self_contained: true  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,progress = FALSE, verbose = FALSE)
+```
+
+
+
+# Loading libraries and data 
+
+
+```{r librarues, include=FALSE}
+source( file.path( WORKING_DIR, "generalDeps.R"));
+source( file.path( WORKING_DIR, "allFunctions.R"));
+```
+
+
+
+```{r loadings}
+
+
+
+# Could be cutomized, but should not change results
+gctree_contrib = 0.75
+mutpars_contrib = 0.25
+
+
+
+
+available_chains = list.dirs(path = GCTREE_FOLDER, full.names = F, recursive = F)
+
+
+
+airr_table =  read.table(file = CONTIG_AIRR_FILE, header = T, sep = "\t")
+
+
+current_clono = gsub(".*Id(.+)_IG.*", "\\1",  basename(GCTREE_FOLDER)  )
+current_clono = paste0( "CLONOTYPE_",     gsub(".*Id(.+)_IG.*", "\\1",  basename(GCTREE_FOLDER)  )        )
+current_clono = gsub(".*Id(.+)_IG.*", "\\1",  basename(GCTREE_FOLDER)  )  
+
+airr_table = airr_table %>%  dplyr::filter(  sub(".*TYPE_","",cloneID) == current_clono ) %>% dplyr::select(cell_id, ends_with("sequence_id")) 
+
+
+
+
+
+#current_clono = str_remove( basename(GCTREE_FOLDER), "n[0-9]{1,5}_Id")
+#print(paste0("CLONO: ", current_clono))
+#current_clono = str_remove(current_clono, '(?=_IG).+') #NEW => if clono names featres ig composition
+
+
+#airr_table = airr_table %>%  dplyr::filter(cloneID == current_clono ) %>% dplyr::select(cell_id, ends_with("sequence_id")) 
+
+#all_seq_ids = c()
+#idmapfiles = list.files(GCTREE_FOLDER, pattern = '.*idmap.txt', include.dirs = T, recursive = T, full.names = T)
+#for (idmap in idmapfiles ){
+#  idmap = read.csv(idmap, header = F) %>% separate_rows(V2, sep=":")
+#  all_seq_ids <- c(all_seq_ids,  idmap$V2 )
+#}
+#airr_table = airr_table %>%  dplyr::filter(cell_id %in% all_seq_ids ) %>% dplyr::select(cell_id, ends_with("sequence_id")) 
+#write.table(airr_table, file = file.path(GCTREE_FOLDER, "airr_table2.txt") , row.names = T, sep = "\t")
+
+```
+
+
+```{r}
+read_chunk( path=file.path( WORKING_DIR, "Selection.Productivity_CSR_topology.R"));
+read_chunk( path=file.path( WORKING_DIR, "Selection.ChainMatching_Gctree_MutPars.R"));
+read_chunk( path=file.path( WORKING_DIR, "Selection.SavingOutputs.R"));
+```
+
+
+
+# Applying Criteria {.tabset .tabset-fade} 
+
+Selection criteria 
+* highest gctree likelihood
+* lowest Mut and isotype pars
+* productivity all parent nodes 
+* concordance between chains 
+
+
+```{r Productivity_CSR_topology}
+<<Productivity_CSR_topology>>
+
+```
+
+
+
+
+
+
+```{r ChainMatching_Gctree_MutPars, fig.height=2.5, fig.width=6}
+<<ChainMatching_Gctree_MutPars>>
+```
+
+
+
+# Parsimony Forest & Selected Tree 
+
+
+
+```{r SavingOutputs, fig.height=5, fig.width=10}
+
+<<Selection.SavingOutputs>>
+  
+  
+```
+
+
+
+
+
+

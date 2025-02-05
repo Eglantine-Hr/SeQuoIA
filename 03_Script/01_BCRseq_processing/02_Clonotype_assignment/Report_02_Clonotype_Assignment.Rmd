@@ -1,0 +1,163 @@
+---
+output:
+  html_document: 
+    theme: cerulean
+    toc: true
+    toc_float: true
+    toc_depth: 6
+    code_folding: hide 
+  pdf_document: default
+  urlcolor: blue
+---
+
+
+
+
+```{r setKnitrOptions, include=FALSE}
+knitr::opts_chunk$set( results='asis', error = TRUE, fig.dim = c(7,7), autodep = TRUE, message=FALSE, warning=FALSE)
+```
+
+
+
+
+```{r rmd_loadParamsAndDependencies, warning=FALSE, cache = FALSE}
+### Define working folder
+WORKING_DIR   = getwd();
+
+
+### Load libraries, global functions/variables, and chunks
+source( file.path( WORKING_DIR, "00_generalDeps.R"));
+source( file.path( WORKING_DIR, "../allFunctions.R"));
+
+# Import chunks from source files
+read_chunk( path=file.path( WORKING_DIR, "01_prepareData.R"));
+read_chunk( path=file.path( WORKING_DIR, "02_cellSimilarityChainBased.R"));
+read_chunk( path=file.path( WORKING_DIR, "03_clonesAssignment.R"));
+read_chunk( path=file.path( WORKING_DIR, "04_clonesVizualisationSummary.R"));
+```
+
+---
+title: `r paste(SCIENTIFIC_PROJECT_NAME, EXPERIMENT_PROJECT_NAME, ANALYSIS_STEP_NAME, sep ="<BR>")`
+---
+
+
+```{r initFunctions}
+
+### Create output directory
+dir.create( PATH_ANALYSIS_OUTPUT, showWarnings = FALSE);
+
+
+### Record starting time (for report and file names)
+startTime = Sys.time();
+startTimeReport   = format( startTime, "%Y %m %d %H:%M:%S")
+startTimeFileName = format( startTime, "%Y_%m_%d_%H_%M_%S")
+
+
+### Initialize utils
+
+# Create a hash for all parameters
+paramsHash = digest( paramsEnv, algo="murmur32");
+
+# Set seed for pseudo random number generator
+set.seed(42);
+
+# Create a hidden empty heatmap to prevent heatmapr interference with plotly functions (bug ?)
+cat('<div style="display: none">');
+main_heatmap(matrix(0));
+cat('</div>');
+```
+
+
+
+
+## Single cell clonotype assignment per sample
+
+
+### Run informations {.tabset .tabset-fade}
+
+#### Run
+<center>
+```{r runInfo_run}
+pander( c( 'Date'     = startTimeReport,
+           'Sample'   = SAMPLE_NAME,
+           'Hash'     = paramsHash));
+```
+</center>
+
+#### Parameters
+```{r runInfo_params}
+#showSimpleDT( paramsEnv); # Does not handle lists or nested lists easily
+listParams = as.list( paramsEnv);
+pander(listParams[order(names(listParams))]); # Show params in alphabetical order
+```
+
+#### System
+<center>
+```{r runInfo_sysInfo}
+showSimpleDT( Sys.info())
+```
+</center>
+
+#### R
+```{r runInfo_r}
+pander( sessionInfo());
+```
+
+<!-- Ending the tabset section -->
+### {.toc-ignore} 
+<br /><br />
+
+
+
+[//]: # "Load the data"
+```{r dataLoadpreProcess}
+<<clusterSetup>>
+<<prepareData>>
+```
+<br />
+
+[//]: # "Cell clones similarity computation based on either light or heavy chain"
+```{r similarityComputation}
+<<scoring_matrix_initialization>>
+<<heavy_based_distance>>
+<<light_based_distance>>
+```
+<br />
+
+[//]: # "Clone assignment"
+```{r cloneAssignment}
+<<heavy_chain_based_assignment>>
+<<light_chain_based_assignment>>
+<<both_chains_based_clonotype_assignment>>
+```
+<br />
+
+### Chain Based Clustering {.tabset .tabset-fade}
+
+```{r chainBasedClustering}
+<<clustering_cutree_vizualisation>>
+```
+
+<!-- Ending the tabset section -->
+### {.toc-ignore} 
+<br /><br />
+
+### Clonotypes info
+
+```{r clonotypeInfo}
+<<clonotype_datatable>>
+```
+<br />
+
+### Clonotypes summary
+
+```{r clonotypeSummary}
+<<clonotype_summary>>
+```
+<br />
+
+[//]: # "Saving the data"
+```{r SavingData}
+<<savingData>>
+```
+<br />

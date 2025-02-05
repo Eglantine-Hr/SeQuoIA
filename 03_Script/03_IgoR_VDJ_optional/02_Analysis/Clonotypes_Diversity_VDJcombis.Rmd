@@ -1,0 +1,104 @@
+---
+title: "Aggregating Sequence Scores Results"
+author: "hector@ciml.univ-mrs.fr"
+output:
+  html_document:
+    code_folding: hide
+    theme: cerulean
+    toc: true
+    toc_float: true
+    mathjax: null 
+    self_contained: true  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,progress = FALSE, verbose = FALSE)
+```
+
+
+
+# Loading libraries and data 
+
+
+```{r loadings}
+
+#libraries
+source( file.path( WORKING_DIR, "00_generalDeps.R"));
+#source( file.path( WORKING_DIR, "allFunctions.R"));
+
+
+# Data 
+#"Input_table = "/mnt/DOSI/PMLAB/BIOINFO/FL_modeling/01_FL_vs_Physio_data_analysis/05_Output/04_Analysis/04_Merging_Results/MOUSE_GC_PMLAB/All_Samples_Merged_Scores.txt"
+
+All_Scores_Df  = read.table(ALL_SCORES_TABLE, header = T)
+All_Scores_Df = All_Scores_Df %>% dplyr::mutate(Clone_Size =   as.numeric(gsub(".*CLONOTYPE_n(.+)_Id.*", "\\1", Clonotype))  )
+
+
+All_Clones_Df = read.table(ALL_CLONES_TABLE, header = T, sep = "\t")
+if("Sample" %in% names(All_Clones_Df) ==F){All_Clones_Df$Sample = "All"}
+#All_Clones_Df = as.data.frame(All_Clones_Df) %>% dplyr::select(cell_id, Sample, cloneID,  heavy_v_call,  light_v_call)
+
+```
+
+
+
+```{r}
+read_chunk( path=file.path( WORKING_DIR, "01_CloneSize_Correlation.R"));
+read_chunk( path=file.path( WORKING_DIR, "02_SelectScores_groups.R"));
+read_chunk( path=file.path( WORKING_DIR, "03_Clonal_Diversity.R"));
+```
+
+
+# Clonal Diversity
+
+```{r Clonal_Diversity, fig.width=7}
+<<Clonal_Diversity>>
+
+```
+
+Chao1 is a non-parametric estimator widely used in studies of species richness in natural ecosystems. The rationale
+is that if many species (or clones) are detected only once, there is likely a large number of
+clones that have not yet been detected; when all clones have been detected at least twice,
+it is unlikely that new undetected clones exist.
+reference: https://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf 
+
+
+
+```{r Chao1_Inference, fig.height=3}
+<<Chao1_Inference>>
+
+```
+
+
+# Clone size vs Select Score 
+
+```{r CloneSize_Correlation , fig.height=3.5, fig.width=5.5}
+<<CloneSize_Correlation>>
+
+```
+<br />
+
+# Select Score per group {.tabset .tabset-fade} 
+
+
+
+
+
+```{r SelectScores_groups, fig.height=5.5, fig.width=11}
+<<SelectScores_groups>>
+```
+
+
+
+
+
+
+<!-- Ending the tabset section -->
+### {.toc-ignore} 
+<br /><br />
+
+
+
+# End
+
+

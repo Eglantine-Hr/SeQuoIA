@@ -1,0 +1,60 @@
+---
+title: "Global Selection Score analysis"
+author: "hector@ciml.univ-mrs.fr"
+output:
+  html_document:
+    code_folding: hide
+    theme: cerulean
+    toc: true
+    toc_float: true
+    mathjax: null 
+    self_contained: true  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,progress = FALSE, verbose = FALSE)
+```
+
+
+
+
+```{r}
+read_chunk( path=file.path( WORKING_DIR, "02.a_LocalSelection_Groups.R"));
+read_chunk( path=file.path( WORKING_DIR, "02.b_GlobalSelection_groups.R"));
+read_chunk( path=file.path( WORKING_DIR, "02.c_GlobalSelection_pseudotime.R"));
+```
+
+# Local distribution scores by group of sequences {.tabset .tabset-fade}
+
+
+```{r LocalSelection_Groups,fig.height=14, fig.width=14 , results = "asis"}
+<<LocalSelection_Groups>>
+
+```
+
+
+# Global score distribution {.tabset .tabset-fade} 
+
+
+```{r GLOBAL_Score_Computation_Comparisons, results = "asis" }
+
+<<GLOBAL_Score_Computation_Comparisons>>
+```
+
+
+
+
+
+# PseudoTime analysis {.tabset .tabset-fade} 
+
+
+
+```{r GLOBAL_Score_Pseudotime, results = "asis"}
+ <<GLOBAL_Score_Pseudotime>>
+
+
+```
+
+
+
+
