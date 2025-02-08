@@ -97,7 +97,7 @@ applyMutationModel <- function(Sequence, chain, DATASET ){
   
   if(grepl(isMurineModel, DATASET)  ){
   	if(chain == "Heavy"){ mutModel = MH_RS5A #MH_RS5A
-  	}else{mutModel = HKL_S5F } #MK_RS5NF }
+  	}else{mutModel = MH_RS5A } #MK_RS5NF }
   }else{
   	if(chain == "Heavy"){ mutModel = HH_S5F
   	}else{mutModel = HKL_S5F }
