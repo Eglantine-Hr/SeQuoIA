@@ -82,7 +82,7 @@ if(length(na.omit(scRNAseq_metadata_path)) > 0 ){ #if metadata found
 	colNums = colNums[which(is.na(colNums) ==F)]
 	 
     
-    	current_pheno_to_add = Selected_PhenoMetadata %>% dplyr::select(colNums) 
+    	current_pheno_to_add = Selected_PhenoMetadata %>% dplyr::select(colNums) %>%
     				dplyr::filter(SeqID %in% SeqName_Features$SeqID ) 
     	current_pheno_to_add = left_join(Sequence_Selection_Scores,  current_pheno_to_add  %>% distinct() )
     	
